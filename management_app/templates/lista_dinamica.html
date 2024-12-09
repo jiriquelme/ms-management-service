@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ titulo }}</title>
+        <style>
+            /* Estilos básicos */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
+            }
+    
+            body {
+                background-color: #f4f6f8;
+                padding: 20px;
+                font-size: 14px;
+                color: #333;
+            }
+    
+            .container {
+                width: 90%;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+    
+            h1 {
+                text-align: center;
+                margin-bottom: 20px;
+                font-size: 1.8rem;
+                color: #444;
+            }
+    
+            .search-bar {
+                margin-bottom: 15px;
+                text-align: right;
+            }
+    
+            .search-bar input {
+                padding: 10px;
+                width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+    
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+    
+            th, td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+    
+            th {
+                background-color: #007bff;
+                color: white;
+                position: relative;
+                cursor: pointer;
+            }
+    
+            th.sortable:hover {
+                background-color: #0056b3;
+            }
+    
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+    
+            .actions {
+                display: flex;
+                gap: 5px;
+            }
+    
+            .actions a {
+                text-decoration: none;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+    
+            .actions .edit {
+                background-color: #28a745;
+            }
+    
+            .actions .delete {
+                background-color: #dc3545;
+            }
+    
+            .add-btn {
+                display: block;
+                width: fit-content;
+                margin: 0 auto 20px;
+                text-decoration: none;
+                color: white;
+                background-color: #007bff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+    
+            .add-btn:hover {
+                background-color: #0056b3;
+            }
+    
+            .delete-btn {
+                display: block;
+                margin: 20px auto;
+                text-align: center;
+                color: white;
+                background-color: #dc3545;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 14px;
+                cursor: pointer;
+            }
+    
+            .delete-btn:hover {
+                background-color: #b02a37;
+            }
+    
+            .back-link {
+                display: block;
+                margin-bottom: 10px;
+                color: #007bff;
+                text-decoration: none;
+            }
+    
+            .back-link:hover {
+                text-decoration: underline;
+            }
+    
+            .estado-pendiente {
+                color: #ff9800; /* Naranja */
+                font-weight: bold;
+            }
+    
+            .estado-entregado {
+                color: #4caf50; /* Verde */
+                font-weight: bold;
+            }
+        </style>
+    </head>   
+    <body>
+        <div class="container">
+            <!-- Botón de regreso -->
+            <a href="/" class="back-link">&#8592; Volver a la página principal</a>
+    
+            <!-- Título -->
+            <h1>{{ titulo }}</h1>
+    
+            <!-- Barra de búsqueda -->
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar...">
+            </div>
+    
+            <!-- Botón para agregar nuevo registro -->
+            {% if modelo == 'residente' %}
+                <a href="{% url 'crear_residente' %}" class="add-btn">Agregar Residente</a>
+            {% elif modelo == 'departamento' %}
+                <a href="{% url 'crear_departamento' %}" class="add-btn">Agregar Departamento</a>
+            {% elif modelo == 'encomienda' %}
+                <a href="{% url 'crear_encomienda' %}" class="add-btn">Agregar Encomienda</a>
+            {% endif %}
+    
+            <!-- Botón para eliminar seleccionados -->
+            {% if modelo == 'encomienda' %}
+                <button id="deleteSelected" class="delete-btn">Eliminar Seleccionados</button>
+            {% endif %}
+    
+            <!-- Tabla de datos -->
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        {% if modelo == 'encomienda' %}
+                            <th>
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                        {% endif %}
+                        {% if modelo == 'residente' %}
+                            <th class="sortable">RUT</th>
+                            <th class="sortable">Nombre Completo</th>
+                            <th class="sortable">Teléfono</th>
+                            <th>Acciones</th>
+                        {% elif modelo == 'departamento' %}
+                            <th class="sortable">Código</th>
+                            <th class="sortable">Residente</th>
+                            <th>Acciones</th>
+                        {% elif modelo == 'encomienda' %}
+                            <th class="sortable">Fecha de Llegada</th>
+                            <th class="sortable">Departamento</th>
+                            <th class="sortable">Residente</th>
+                            <th class="sortable">Estado</th>
+                            <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in datos %}
+                        <tr>
+                            {% if modelo == 'encomienda' %}
+                                <td>
+                                    <input type="checkbox" class="select-item" data-id="{{ item.id }}">
+                                </td>
+                            {% endif %}
+                            {% if modelo == 'residente' %}
+                                <td>{{ item.RUT }}-{{ item.DV }}</td>
+                                {% if item.Segundo_Apellido is None %}
+                                    <td>{{ item.Nombres }} {{ item.Primer_Apellido }}</td>
+                                {% else %}
+                                    <td>{{ item.Nombres }} {{ item.Primer_Apellido }} {{ item.Segundo_Apellido }}</td>
+                                {% endif %}
+                                <td>{{ item.Telefono }}</td>
+                                <td class="actions">
+                                    <a href="{% url 'editar_residente' item.id %}" class="edit">Editar</a>
+                                    <a href="{% url 'eliminar_residente' item.id %}" class="delete">Eliminar</a>
+                                </td>
+                            {% elif modelo == 'departamento' %}
+                                <td>{{ item.Codigo }}</td>
+                                <td>
+                                    {% if item.Residente %}
+                                        {{ item.Residente.Nombres }} {{ item.Residente.Primer_Apellido }}
+                                    {% else %}
+                                        Sin Residente
+                                    {% endif %}
+                                </td>
+                                <td class="actions">
+                                    <a href="{% url 'editar_departamento' item.id %}" class="edit">Editar</a>
+                                    <a href="{% url 'eliminar_departamento' item.id %}" class="delete">Eliminar</a>
+                                </td>
+                            {% elif modelo == 'encomienda' %}
+                                <td>{{ item.Fecha_Llegada }}</td>
+                                <td>{{ item.Departamento.Codigo }}</td>
+                                <td>{{ item.Residente.Nombres }} {{ item.Residente.Primer_Apellido }}</td>
+                                <td class="{{ item.estado_clase }}">{{ item.Estado.Estado }}</td>
+                                <td class="actions">
+                                    <a href="{% url 'editar_encomienda' item.id %}" class="edit">Editar</a>
+                                    <a href="{% url 'eliminar_encomienda' item.id %}" class="delete">Eliminar</a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+        <script>
+            // Seleccionar/Deseleccionar todos
+            document.getElementById('selectAll')?.addEventListener('change', function () {
+                document.querySelectorAll('.select-item').forEach(item => {
+                    item.checked = this.checked;
+                });
+            });
+    
+            // Eliminar seleccionados
+            document.getElementById('deleteSelected')?.addEventListener('click', function () {
+                const selectedIds = Array.from(document.querySelectorAll('.select-item:checked')).map(item => item.dataset.id);
+                if (!selectedIds.length) {
+                    alert('No se seleccionó ninguna encomienda.');
+                    return;
+                }
+    
+                if (!confirm('¿Eliminar las encomiendas seleccionadas?')) return;
+    
+                fetch("{% url 'eliminar_encomiendas_seleccionadas' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({ ids: selectedIds }),
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Encomiendas eliminadas con éxito.');
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar las encomiendas.');
+                    }
+                });
+            });
+        </script>
+    </body>    
+</html>

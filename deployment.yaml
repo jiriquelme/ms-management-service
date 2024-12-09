@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: management-service
+  labels:
+    app: management-service
+spec:
+  replicas: 1  # Número de réplicas del servicio
+  selector:
+    matchLabels:
+      app: management-service
+  template:
+    metadata:
+      labels:
+        app: management-service
+    spec:
+      containers:
+        - name: management-service
+          image: gcr.io/diesel-environs-435423-j6/management-service:latest  # Cambia esto por tu imagen de Docker
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: management_service.settings
+            - name: DB_NAME
+              value: jainitordb
+            - name: DB_USER
+              value: root
+            - name: DB_PASSWORD
+              value: jainitor123456
+            - name: DB_HOST
+              value: 34.176.119.119
+            - name: DB_PORT
+              value: "3306"

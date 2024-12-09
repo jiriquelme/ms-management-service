@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    image: ms-management-service:latest
+    container_name: management_service
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: management_service.settings
+      DB_NAME: jainitordb
+      DB_USER: root
+      DB_PASSWORD: jainitor123456
+      DB_HOST: 34.176.119.119
+      DB_PORT: 3306
+    networks:
+      - backend
+
+networks:
+  backend:
